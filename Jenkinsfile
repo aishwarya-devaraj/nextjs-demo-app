@@ -285,22 +285,9 @@ pipeline {
         }
         success {
             echo "🎉 Pipeline PASSED for build #${BUILD_NUMBER}"
-            slackSend(
-                channel: env.SLACK_CHANNEL,
-                color:   'good',
-                message: "✅ *${JOB_NAME}* #${BUILD_NUMBER} deployed!\n" +
-                         "Image: `${env.IMAGE_VERSIONED}`\n" +
-                         "Host: `http://${EC2_HOST}`\n" +
-                         "<${BUILD_URL}|View Build>"
-            )
         }
         failure {
             echo "💥 Pipeline FAILED for build #${BUILD_NUMBER}"
-            slackSend(
-                channel: env.SLACK_CHANNEL,
-                color:   'danger',
-                message: "❌ *${JOB_NAME}* #${BUILD_NUMBER} failed!\n<${BUILD_URL}|View Logs>"
-            )
         }
     }
 
