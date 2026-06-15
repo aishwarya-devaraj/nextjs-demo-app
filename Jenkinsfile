@@ -189,49 +189,38 @@ pipeline {
                 }
             }
             steps {
-                withCredentials([
-                    sshUserPrivateKey(
-                        credentialsId: env.SSH_KEY_ID,
-                        keyFileVariable: 'SSH_KEY'
-                    ),
-                    usernamePassword(
-                        credentialsId: 'dockerhub-credentials',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    echo "🚀 Deploying ${IMAGE_LATEST} to EC2: ${EC2_HOST}"
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    echo "🚀 Deploying ${IMAGE_LATEST} directly on this server..."
                     sh """
-                        ssh -o StrictHostKeyChecking=no \
-                            -i "\${SSH_KEY}" \
-                            ${EC2_USER}@${EC2_HOST} '
+                        echo "🔐 Logging into Docker Hub..."
+                        echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
 
-                            echo "🔐 Logging into Docker Hub..."
-                            echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+                        echo "📦 Pulling latest image..."
+                        docker pull ${IMAGE_LATEST}
 
-                            echo "📦 Pulling latest image..."
-                            docker pull ${env.IMAGE_VERSIONED}
+                        echo "🛑 Stopping existing container (if any)..."
+                        docker stop ${CONTAINER_NAME} 2>/dev/null || true
+                        docker rm   ${CONTAINER_NAME} 2>/dev/null || true
 
-                            echo "🛑 Stopping existing container (if any)..."
-                            docker stop ${CONTAINER_NAME} 2>/dev/null || true
-                            docker rm   ${CONTAINER_NAME} 2>/dev/null || true
+                        echo "▶️  Starting new container..."
+                        docker run -d \\
+                          --name ${CONTAINER_NAME} \\
+                          --restart unless-stopped \\
+                          -p ${APP_PORT_HOST}:${APP_PORT_CONTAINER} \\
+                          -e NODE_ENV=production \\
+                          -e PORT=${APP_PORT_CONTAINER} \\
+                          ${IMAGE_LATEST}
 
-                            echo "▶️  Starting new container..."
-                            docker run -d \
-                              --name ${CONTAINER_NAME} \
-                              --restart unless-stopped \
-                              -p ${APP_PORT_HOST}:${APP_PORT_CONTAINER} \
-                              -e NODE_ENV=production \
-                              -e PORT=${APP_PORT_CONTAINER} \
-                              ${env.IMAGE_VERSIONED}
+                        echo "🧹 Removing dangling images..."
+                        docker image prune -f
 
-                            echo "🧹 Removing old/dangling images..."
-                            docker image prune -f
-
-                            docker logout
-                            echo "✅ Container is running!"
-                            docker ps --filter name=${CONTAINER_NAME} --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-                        '
+                        docker logout
+                        echo "✅ Container is running!"
+                        docker ps --filter name=${CONTAINER_NAME} --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
                     """
                 }
             }
