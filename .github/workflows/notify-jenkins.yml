@@ -1,0 +1,34 @@
+# ============================================================
+# .github/workflows/notify-jenkins.yml
+# GitHub Actions shim — triggers Jenkins pipeline via webhook
+# (Only needed if you prefer GA to trigger Jenkins instead of
+#  the native GitHub webhook plugin)
+# ============================================================
+
+name: Notify Jenkins Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  trigger-jenkins:
+    name: 🔔 Trigger Jenkins Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Notify Jenkins via webhook
+        run: |
+          curl -X POST \
+            --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_API_TOKEN }}" \
+            "${{ secrets.JENKINS_URL }}/job/nextjs-demo-pipeline/build?token=${{ secrets.JENKINS_BUILD_TOKEN }}" \
+            --data-urlencode json='{
+              "parameter": [
+                {"name": "GIT_BRANCH",  "value": "${{ github.ref_name }}"},
+                {"name": "GIT_COMMIT",  "value": "${{ github.sha }}"},
+                {"name": "TRIGGERED_BY","value": "${{ github.actor }}"}
+              ]
+            }'
+          echo "✅ Jenkins build triggered for branch ${{ github.ref_name }}"
