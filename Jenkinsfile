@@ -136,12 +136,11 @@ pipeline {
         // ─────────────────────────────────────────
         stage('🐳 Build Docker Image') {
             steps {
-                echo "🐳 Building Docker image: ${env.IMAGE_VERSIONED}"
+                echo "🐳 Building Docker image: ${IMAGE_LATEST}"
                 sh """
                     docker build \
                       --build-arg GIT_COMMIT=${env.GIT_COMMIT_SHORT} \
                       --build-arg BUILD_DATE=\$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
-                      --tag ${env.IMAGE_VERSIONED} \
                       --tag ${IMAGE_LATEST} \
                       .
                 """
@@ -169,13 +168,10 @@ pipeline {
                     echo "🔐 Logging in to Docker Hub..."
                     sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
 
-                    echo "📤 Pushing: ${env.IMAGE_VERSIONED}"
-                    sh "docker push ${env.IMAGE_VERSIONED}"
-
                     echo "📤 Pushing: ${IMAGE_LATEST}"
                     sh "docker push ${IMAGE_LATEST}"
 
-                    echo "✅ Images pushed to Docker Hub!"
+                    echo "✅ Image pushed to Docker Hub!"
                     sh "docker logout"
                 }
             }
@@ -204,7 +200,7 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
-                    echo "🚀 Deploying ${env.IMAGE_VERSIONED} to EC2: ${EC2_HOST}"
+                    echo "🚀 Deploying ${IMAGE_LATEST} to EC2: ${EC2_HOST}"
                     sh """
                         ssh -o StrictHostKeyChecking=no \
                             -i "\${SSH_KEY}" \
