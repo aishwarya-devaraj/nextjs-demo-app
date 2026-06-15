@@ -84,11 +84,11 @@ pipeline {
         // ─────────────────────────────────────────
         stage('📦 Install Dependencies') {
             steps {
-                echo "📦 Running npm ci..."
+                echo "📦 Running npm install..."
                 sh '''
                     node --version
                     npm  --version
-                    NODE_OPTIONS="--max-old-space-size=512" npm ci --prefer-offline
+                    NODE_OPTIONS="--max-old-space-size=512" npm install --no-audit --no-fund --prefer-offline
                 '''
             }
         }
