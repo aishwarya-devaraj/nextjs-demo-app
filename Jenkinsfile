@@ -155,7 +155,8 @@ pipeline {
         stage('📤 Push to Docker Hub') {
             when {
                 anyOf {
-                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.GIT_BRANCH_NAME == 'main' }
                     expression { params.FORCE_DEPLOY }
                 }
             }
@@ -186,7 +187,8 @@ pipeline {
         stage('🚀 Deploy to EC2') {
             when {
                 anyOf {
-                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.GIT_BRANCH_NAME == 'main' }
                     expression { params.FORCE_DEPLOY }
                 }
             }
@@ -245,7 +247,8 @@ pipeline {
         stage('💨 Health Check') {
             when {
                 anyOf {
-                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.GIT_BRANCH_NAME == 'main' }
                     expression { params.FORCE_DEPLOY }
                 }
             }
