@@ -81,11 +81,11 @@ pipeline {
         // ─────────────────────────────────────────
         stage('📦 Install Dependencies') {
             steps {
-                echo "📦 Running npm ci..."
+                echo "📦 Running npm install..."
                 sh '''
                     node --version
                     npm  --version
-                    npm ci
+                    npm install
                 '''
             }
         }
