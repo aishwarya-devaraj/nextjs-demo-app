@@ -17,7 +17,7 @@ pipeline {
         DOCKERHUB_REPO       = "${DOCKERHUB_USERNAME}/nextjs-demo-app"
 
         // ── AWS EC2 ──
-        EC2_HOST             = credentials('ec2-public-ip')        // Jenkins secret text (EC2 public IP)
+        EC2_HOST             = '54.175.95.105'                      // EC2 Public IP (EC2 public IP)
         EC2_USER             = 'ec2-user'
         SSH_KEY_ID           = 'ec2-ssh-key'                       // Jenkins SSH private key credential
         APP_PORT_CONTAINER   = '3000'
