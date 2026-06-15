@@ -18,7 +18,7 @@ pipeline {
 
         // ── AWS EC2 ──
         EC2_HOST             = '54.175.95.105'                      // EC2 Public IP (EC2 public IP)
-        EC2_USER             = 'ec2-user'
+        EC2_USER             = 'ubuntu'
         SSH_KEY_ID           = 'ec2-ssh-key'                       // Jenkins SSH private key credential
         APP_PORT_CONTAINER   = '3000'
         APP_PORT_HOST        = '80'
