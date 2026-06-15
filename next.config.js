@@ -1,7 +1,7 @@
-# ============================================================
-# next.config.js — Next.js configuration for CI/CD deployment
-# Enables standalone output required for Docker multi-stage build
-# ============================================================
+// ============================================================
+// next.config.js — Next.js configuration for CI/CD deployment
+// Enables standalone output required for Docker multi-stage build
+// ============================================================
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
