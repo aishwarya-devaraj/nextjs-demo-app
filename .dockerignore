@@ -1,6 +1,6 @@
 # Docker — exclude heavy/unnecessary files from build context
 node_modules
-.next
+.next/cache
 .git
 .gitignore
 *.md
