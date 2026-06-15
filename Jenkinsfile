@@ -9,6 +9,14 @@ pipeline {
     agent { label 'docker-agent' }
 
     // ──────────────────────────────────────────────
+    // Triggers — Poll GitHub every minute for new commits
+    // (Fallback for webhook timeouts on free-tier EC2)
+    // ──────────────────────────────────────────────
+    triggers {
+        pollSCM('* * * * *')
+    }
+
+    // ──────────────────────────────────────────────
     // Environment Variables
     // ──────────────────────────────────────────────
     environment {
