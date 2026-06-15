@@ -21,7 +21,7 @@ pipeline {
         EC2_USER             = 'ubuntu'
         SSH_KEY_ID           = 'ec2-ssh-key'                       // Jenkins SSH private key credential
         APP_PORT_CONTAINER   = '3000'
-        APP_PORT_HOST        = '80'
+        APP_PORT_HOST        = '3000'  // Nginx owns :80, container binds to :3000
         CONTAINER_NAME       = 'nextjs-app'
 
         // ── Image Tag ──
@@ -155,8 +155,8 @@ pipeline {
         stage('📤 Push to Docker Hub') {
             when {
                 anyOf {
-                    expression { env.GIT_BRANCH == 'origin/main' }
-                    expression { env.GIT_BRANCH_NAME == 'main' }
+                    expression { env.GIT_BRANCH ==~ /.*main.*/ }
+                    expression { env.GIT_BRANCH_NAME ==~ /.*main.*|HEAD/ }
                     expression { params.FORCE_DEPLOY }
                 }
             }
@@ -187,8 +187,8 @@ pipeline {
         stage('🚀 Deploy to EC2') {
             when {
                 anyOf {
-                    expression { env.GIT_BRANCH == 'origin/main' }
-                    expression { env.GIT_BRANCH_NAME == 'main' }
+                    expression { env.GIT_BRANCH ==~ /.*main.*/ }
+                    expression { env.GIT_BRANCH_NAME ==~ /.*main.*|HEAD/ }
                     expression { params.FORCE_DEPLOY }
                 }
             }
@@ -247,8 +247,8 @@ pipeline {
         stage('💨 Health Check') {
             when {
                 anyOf {
-                    expression { env.GIT_BRANCH == 'origin/main' }
-                    expression { env.GIT_BRANCH_NAME == 'main' }
+                    expression { env.GIT_BRANCH ==~ /.*main.*/ }
+                    expression { env.GIT_BRANCH_NAME ==~ /.*main.*|HEAD/ }
                     expression { params.FORCE_DEPLOY }
                 }
             }
