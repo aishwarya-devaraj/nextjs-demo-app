@@ -13,7 +13,7 @@ pipeline {
     // ──────────────────────────────────────────────
     environment {
         // ── Docker Hub ──
-        DOCKERHUB_USERNAME   = 'aishwarya-devaraj'                  // Docker Hub username
+        DOCKERHUB_USERNAME   = 'aishwaryadevaraj'                  // Docker Hub username
         DOCKERHUB_REPO       = "${DOCKERHUB_USERNAME}/nextjs-demo-app"
 
         // ── AWS EC2 ──
