@@ -2,41 +2,27 @@ pipeline {
 
     agent any
 
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['DEV', 'QA', 'PROD'],
+            description: 'Select the deployment environment'
+        )
+    }
+
     stages {
 
-        stage('Checkout') {
+        stage('Display Environment') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/aishwarya-devaraj/nextjs-demo-app.git'
+                echo "Selected Environment: ${params.ENVIRONMENT}"
             }
         }
 
-        stage('Workspace') {
-            steps {
-                sh 'pwd'
-                sh 'whoami'
-                sh 'ls -la'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo 'Build Started'
-            }
-        }
     }
 
     post {
-        success {
-            echo 'Pipeline Success'
-        }
-
-        failure {
-            echo 'Pipeline Failed'
-        }
-
         always {
-            echo 'Pipeline Finished'
+            echo "Pipeline Finished"
         }
     }
 }
