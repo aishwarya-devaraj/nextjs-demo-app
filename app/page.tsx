@@ -7,7 +7,7 @@ export default function Home() {
       <main className={styles.main}>
         <div className={styles.intro}>
           <h1>Hello Aish!</h1>
-          <p>Welcome to Next.js app.</p>
+          <p>Welcome to Next.js app</p>
         </div>
       </main>
     </div>
