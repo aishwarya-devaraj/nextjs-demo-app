@@ -6,18 +6,30 @@ pipeline {
         choice(
             name: 'ENVIRONMENT',
             choices: ['DEV', 'QA', 'PROD'],
-            description: 'Select the deployment environment'
+            description: 'Select Environment'
         )
     }
 
     stages {
 
-        stage('Display Environment') {
+        stage('Build') {
             steps {
-                echo "Selected Environment: ${params.ENVIRONMENT}"
+                echo "Building Application..."
             }
         }
 
+        stage('Deploy') {
+
+            when {
+                expression {
+                    params.ENVIRONMENT == 'PROD'
+                }
+            }
+
+            steps {
+                echo "Deploying to Production..."
+            }
+        }
     }
 
     post {
