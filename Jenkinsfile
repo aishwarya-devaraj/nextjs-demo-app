@@ -3,12 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/aishwarya-devaraj/nextjs-demo-app.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
@@ -25,6 +19,12 @@ pipeline {
             steps {
                 sh 'docker build -t nextjs-app:v1 .'
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline Finished'
         }
     }
 }
