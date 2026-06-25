@@ -1,40 +1,30 @@
 pipeline {
-
     agent any
-
-    parameters {
-        choice(
-            name: 'ENVIRONMENT',
-            choices: ['DEV', 'QA', 'PROD'],
-            description: 'Select Environment'
-        )
-    }
 
     stages {
 
-        stage('Build') {
+        stage('Checkout') {
             steps {
-                echo "Building Application..."
+                git 'https://github.com/aishwarya-devaraj/nextjs-demo-app.git'
             }
         }
 
-        stage('Deploy') {
-
-            when {
-                expression {
-                    params.ENVIRONMENT == 'PROD'
-                }
-            }
-
+        stage('Install Dependencies') {
             steps {
-                echo "Deploying to Production..."
+                sh 'npm install'
             }
         }
-    }
 
-    post {
-        always {
-            echo "Pipeline Finished"
+        stage('Build Next.js') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t nextjs-app:v1 .'
+            }
         }
     }
 }
