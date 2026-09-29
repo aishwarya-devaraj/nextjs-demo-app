@@ -2,44 +2,36 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_REPO = 'aishwaryadevaraj/nextjs-demo-app'
-        IMAGE_TAG = 'latest'
+        DOCKER_IMAGE = 'YOUR_DOCKERHUB_USERNAME/nextjs-demo-app'
+        DOCKER_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
 
-        stage('Install Dependencies') {
+        stage('Checkout') {
             steps {
-                sh 'npm ci'
-            }
-        }
-
-        stage('Build Next.js') {
-            steps {
-                sh 'npm run build'
+                checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ${DOCKERHUB_REPO}:${IMAGE_TAG} .'
+                sh '''
+                    docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+                    docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
+                '''
             }
         }
 
         stage('Login to Docker Hub') {
             steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub-credentials',
-                        usernameVariable: 'DOCKERHUB_USERNAME',
-                        passwordVariable: 'DOCKERHUB_PASSWORD'
-                    )
-                ]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
                     sh '''
-                        echo "$DOCKERHUB_PASSWORD" | \
-                        docker login \
-                        --username "$DOCKERHUB_USERNAME" \
-                        --password-stdin
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
                     '''
                 }
             }
@@ -47,24 +39,22 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                sh 'docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}'
-            }
-        }
-
-        stage('Docker Logout') {
-            steps {
-                sh 'docker logout'
+                sh '''
+                    docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    docker push ${DOCKER_IMAGE}:latest
+                '''
             }
         }
     }
 
     post {
         always {
+            sh 'docker logout || true'
             echo 'Pipeline Finished'
         }
 
         success {
-            echo 'Build and Docker Push Successful!'
+            echo 'Docker image built and pushed successfully!'
         }
 
         failure {
