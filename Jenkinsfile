@@ -2,17 +2,15 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1'
-        AWS_ACCOUNT_ID = '605723802877'
-        IMAGE_NAME = 'nextjs-app'
-        IMAGE_TAG = 'v1'
+        DOCKERHUB_REPO = 'aishwaryadevaraj/nextjs-demo-app'
+        IMAGE_TAG = 'latest'
     }
 
     stages {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                sh 'npm ci'
             }
         }
 
@@ -24,33 +22,38 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t nextjs-app:v1 .'
+                sh 'docker build -t ${DOCKERHUB_REPO}:${IMAGE_TAG} .'
             }
         }
 
-        stage('Login to Amazon ECR') {
+        stage('Login to Docker Hub') {
             steps {
-                sh '''
-                aws ecr get-login-password --region $AWS_REGION | \
-                docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-                '''
-            }
-        }
-
-        stage('Tag Docker Image') {
-            steps {
-                sh '''
-                docker tag $IMAGE_NAME:$IMAGE_TAG \
-                $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG
-                '''
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKERHUB_PASSWORD" | \
+                        docker login \
+                        --username "$DOCKERHUB_USERNAME" \
+                        --password-stdin
+                    '''
+                }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                sh '''
-                docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG
-                '''
+                sh 'docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}'
+            }
+        }
+
+        stage('Docker Logout') {
+            steps {
+                sh 'docker logout'
             }
         }
     }
@@ -59,11 +62,13 @@ pipeline {
         always {
             echo 'Pipeline Finished'
         }
+
         success {
-            echo 'Build Successful!'
+            echo 'Build and Docker Push Successful!'
         }
+
         failure {
-            echo 'Build Failed!'
+            echo 'Build or Docker Push Failed!'
         }
     }
 }
