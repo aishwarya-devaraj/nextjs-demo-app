@@ -2,9 +2,9 @@ pipeline {
     agent any
 
   environment {
-    DOCKER_IMAGE = 'aishwarya/nextjs-demo-app'
+    DOCKER_IMAGE = 'aishwaryadevaraj/nextjs-demo-app'
     DOCKER_TAG = "${BUILD_NUMBER}"
-}
+ }
 
     stages {
 
