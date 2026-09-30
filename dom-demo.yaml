@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-oom-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-oom-demo
+  template:
+    metadata:
+      labels:
+        app: payment-oom-demo
+    spec:
+      containers:
+      - name: payment-api
+        image: polinux/stress
+        resources:
+          limits:
+            memory: "20Mi"
+        command: ["stress"]
+        args: ["--vm", "1", "--vm-bytes", "100M", "--vm-hang", "1"]
+EOF
