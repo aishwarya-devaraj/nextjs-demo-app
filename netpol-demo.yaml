@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netpol-server
+  labels:
+    app: netpol-server
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netpol-server
+spec:
+  selector:
+    app: netpol-server
+  ports:
+  - port: 80
+    targetPort: 80
+
+---
+apiVersion: v1
+kind: NetworkPolicy
+metadata:
+  name: deny-netpol-server
+spec:
+  podSelector:
+    matchLabels:
+      app: netpol-server
+  policyTypes:
+  - Ingress
