@@ -3,13 +3,17 @@ kind: Deployment
 
 metadata:
   name: nextjs-demo-app
+  namespace: nextjs-app
 
 spec:
-  replicas: 2
+  replicas: 3
 
   selector:
     matchLabels:
       app: nextjs-demo-app
+
+  strategy:
+    type: RollingUpdate
 
   template:
     metadata:
@@ -20,5 +24,61 @@ spec:
       containers:
         - name: nextjs-demo-app
           image: aishwaryadevaraj/nextjs-demo-app:9
+          imagePullPolicy: IfNotPresent
+
           ports:
             - containerPort: 3000
+
+          env:
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: nextjs-app-config
+                  key: APP_ENV
+
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: nextjs-app-config
+                  key: APP_NAME
+
+            - name: APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: nextjs-app-secret
+                  key: APP_SECRET
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          volumeMounts:
+            - name: nextjs-storage
+              mountPath: /app/data
+
+      volumes:
+        - name: nextjs-storage
+          persistentVolumeClaim:
+            claimName: nextjs-app-pvc

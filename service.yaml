@@ -3,6 +3,7 @@ kind: Service
 
 metadata:
   name: nextjs-demo-app-service
+  namespace: nextjs-app
 
 spec:
   type: NodePort

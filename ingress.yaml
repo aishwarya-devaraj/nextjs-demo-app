@@ -3,9 +3,12 @@ kind: Ingress
 
 metadata:
   name: nextjs-demo-app-ingress
+  namespace: nextjs-app
+
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: instance
+    alb.ingress.kubernetes.io/subnets: subnet-075cb5d2ecc7af3a4,subnet-029ad50f3431aacb2
 
 spec:
   ingressClassName: alb
